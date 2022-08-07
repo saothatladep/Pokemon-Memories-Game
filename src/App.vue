@@ -1,26 +1,49 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Welcome to Your Vue.js App" />
+	<main-screen v-if="statusMatch === 'default'" @onStart="onHandleBeforeStart($event)" />
+	<interact-screen v-if="statusMatch === 'match'" :cardsContext="setting.cardsContext" @onFinish="onGetResult" />
+	<result-screen v-if="statusMatch === 'result'" :timer="timer" @onStartAgain="playAgain" />
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+import MainScreen from "./components/MainScreen.vue";
+import InteractScreen from "./components/InteractScreen.vue";
+import ResultScreen from "./components/ResultScreen.vue";
+import { reactive, ref } from "vue";
+import { shuffled } from "./utils/array";
+// import CopyRightScreen from "./components/CopyRightScreen.vue";
 
 export default {
-  name: "App",
-  components: {
-    HelloWorld,
-  },
+	components: { MainScreen, InteractScreen, ResultScreen },
+	name: "App",
+	setup() {
+		const statusMatch = ref("default");
+		const timer = ref(0);
+		const setting = reactive({ totalOfBlock: 0, cardsContext: [], startedAt: null });
+
+		function onHandleBeforeStart(config) {
+			setting.totalOfBlock = config.totalOfBlocks;
+
+			const firstCards = Array.from({ length: setting.totalOfBlock / 2 }, (_, i) => i + 1);
+			const secondCards = [...firstCards];
+
+			const cards = [...firstCards, ...secondCards];
+
+			setting.cardsContext = shuffled(shuffled(shuffled(shuffled(cards))));
+			setting.startedAt = new Date().getTime();
+
+			statusMatch.value = "match";
+		}
+
+		const onGetResult = () => {
+			timer.value = new Date().getTime() - setting.startedAt;
+			statusMatch.value = "result";
+		};
+
+		const playAgain = () => {
+			statusMatch.value = "default";
+		};
+
+		return { statusMatch, onHandleBeforeStart, setting, onGetResult, timer, playAgain };
+	},
 };
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
