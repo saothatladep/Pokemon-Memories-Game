@@ -36,6 +36,9 @@ export default {
 		card: {
 			type: [String, Number, Array, Object],
 		},
+		isFlipping: {
+			type: Boolean,
+		},
 		cardsContext: {
 			type: Array,
 			default: function () {
@@ -48,12 +51,17 @@ export default {
 		const isDisabled = ref(false);
 
 		const onToggle = () => {
-			if (isDisabled.value) {
+			if (props.isFlipping) {
 				return false;
-			}
-			isFlipped.value = !isFlipped.value;
-			if (isFlipped.value === true) {
-				emit("onFlip", props.card);
+			} else {
+				if (isDisabled.value) {
+					return false;
+				}
+
+				isFlipped.value = !isFlipped.value;
+				if (isFlipped.value === true) {
+					emit("onFlip", props.card);
+				}
 			}
 		};
 

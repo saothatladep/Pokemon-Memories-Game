@@ -20,6 +20,7 @@
 					}
 				"
 				:cardsContext="cardsContext"
+				:isFlipping="isFlipping"
 			/>
 		</div>
 	</div>
@@ -43,6 +44,7 @@ export default {
 	setup(props, { emit }) {
 		let rules = reactive([]);
 		const divs = ref([]);
+		const isFlipping = ref(false);
 
 		const checkRule = (card) => {
 			if (rules.length === 2) {
@@ -50,9 +52,13 @@ export default {
 			}
 			rules.push(card);
 			if (rules.length === 2 && rules[0].value === rules[1].value) {
+				isFlipping.value = true;
+
 				divs.value[rules[0].index].onEnabledDisableMode();
 				divs.value[rules[1].index].onEnabledDisableMode();
 				rules = [];
+				isFlipping.value = false;
+
 				const disabledEles = document.querySelectorAll(".screen .card.disabled");
 
 				if (disabledEles && disabledEles.length === props.cardsContext.length - 2) {
@@ -61,16 +67,19 @@ export default {
 					}, 1000);
 				}
 			} else if (rules.length === 2 && rules[0].value !== rules[1].value) {
+				isFlipping.value = true;
+
 				setTimeout(() => {
 					divs.value[rules[0].index].onFlipBackCard();
 					divs.value[rules[1].index].onFlipBackCard();
 					rules = [];
+					isFlipping.value = false;
 				}, [800]);
 			} else {
 				return false;
 			}
 		};
-		return { checkRule, rules, divs };
+		return { checkRule, rules, divs, isFlipping };
 	},
 };
 </script>
